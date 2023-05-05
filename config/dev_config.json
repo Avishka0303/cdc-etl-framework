@@ -1,0 +1,30 @@
+{
+    "ssm_parameter_store": {
+        "region":"us-east-1",
+        "sus_parm_name": "/odi/etl-server/sus-config",
+        "sod_parm_name": "/odi/etl-server/sod-config",
+        "dom_parm_name": "/odi/etl-server/dom-config",
+        "seed_odi_etl_parm_name": "/odi/etl-server/seed-odi-etl",
+        "cache_db_parm_name":"/odi/etl-server/odi-cache-db-config"
+    },
+
+    "db_credentials": {
+        "source": {
+            "db_type": "PSQL",
+            "host":"localhost",
+            "port": "5432",
+            "db_name":"source_db",
+            "username":"postgres",
+            "password":"1234"
+        },
+        "target": {
+            "db_type": "PSQL",
+            "host":"localhost",
+            "port": "5432",
+            "db_name":"target_db",
+            "username":"postgres",
+            "password":"1234"
+        }
+    }
+}
+

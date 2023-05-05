@@ -1,0 +1,9 @@
+{   
+    "ETL_REGISTER" : {
+        "user_etl":"UserETL",
+        "transaction_etl": "TransactionETL",
+        "batch_etl": "BatchETL"
+    },
+    "ETL_SRC_MODULE": "etl_src.sample_etls",
+    "LOG_PATH": "/logs"
+}

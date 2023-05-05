@@ -1,0 +1,36 @@
+{
+    "sample_tables" : {
+        "user": {
+            "schema": "test",
+            "columns": "usr_id,usr_name,contact",
+            "pk": "user_id",
+            "condition": null,
+            "retain_days": null,
+            "mat_view": "mt_user",
+            "thread_count": 1,
+            "etl_type": "full-load"
+        },
+        "batch": {
+            "schema": "test",
+            "columns":"batch_id,batch_name,batch_inserted_ts,batch_updated_ts",
+            "pk": "batch_id",
+            "inserted_ts_column": "batch_inserted_ts",
+            "updated_ts_column": "batch_updated_ts",
+            "cdc_key":null,
+            "condition": " WHERE report_date > now()  - interval '14 Day' ",
+            "retain_days": 14,
+            "thread_count": 1,
+            "etl_type": "business-cdc"
+        },
+        "transaction": {
+            "schema": "test",
+            "columns":"trans_id,usr_id,trans_date",
+            "pk": "trans_id",
+            "cdc_key": "trans_date",
+            "condition": null,
+            "retain_days": 5,
+            "thread_count": 1,
+            "etl_type": "cdc"
+        }
+    }
+}
