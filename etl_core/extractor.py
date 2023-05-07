@@ -1,4 +1,5 @@
 from utils.db_connector import get_connection
+from utils.load_config import get_config_dictionary
 
 
 class Extractor:
@@ -9,8 +10,10 @@ class Extractor:
 
     def __init__(self):
         self.source_connection = get_connection(db_name="source")
+        self.BATCH_SIZE = get_config_dictionary()["EXTRACTOR_BATCH_SIZE"]
 
-    def fetch_records_by_cdc(self, schema, table_name, columns, pk_columns, cdc_column, cdc_limit, cdc_key_with_time=True):
+    def fetch_records_by_cdc(self, schema, table_name, columns, pk_columns, cdc_column, cdc_limit,
+                             cdc_key_with_time=True):
         """
         select records by change data capturing.
         """

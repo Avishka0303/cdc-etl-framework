@@ -2,22 +2,20 @@ import argparse
 import time
 
 from etl_core.loader import Loader
-from utils.db_connector import get_cache_db_connection
 from utils.load_config import get_table_definition
 from utils.etl_logger import get_logger
 
 
 def full_purge(table_name):
-    cache_db_connection = get_cache_db_connection()
-    batch_loader = Loader(target_connection=cache_db_connection)
-    batch_loader.delete_all_records(table_name)
+    tbl_def = get_table_definition(table_name)
+    batch_loader = Loader()
+    batch_loader.delete_all_records(schema=tbl_def["schema"], table_name=table_name)
     batch_loader.close_connection()
 
 
 def time_based_purge(table_name):
-    cache_db_connection = get_cache_db_connection()
     tbl_def = get_table_definition(table_name)
-    batch_loader = Loader(target_connection=cache_db_connection)
+    batch_loader = Loader()
     batch_loader.delete_records_by_time(table_name=table_name,
                                         time_column=tbl_def["cdc_key"],
                                         time_in_days=tbl_def["retain_days"])
@@ -43,7 +41,7 @@ if __name__ == '__main__':
     try:
         parser = argparse.ArgumentParser()
         parser.add_argument("-popt", type=str, help="The purge option 'F'- Full purge 'P'- Partial purge(Time based)")
-        parser.add_argument("-tbl", type=str, help="The SOD table name")
+        parser.add_argument("-tbl", type=str, help="The table name")
 
         args = parser.parse_args()
         tbl_name = args.tbl

@@ -9,15 +9,13 @@ from utils.load_config import get_etl_dictionary
 
 def main(etl_name):
 
-    # load ETL name register.
+    # load ETL configurations.
     etl_dictionary = get_etl_dictionary()
     etl_src_module = etl_dictionary["ETL_SRC_MODULE"]
     etl_class_name = etl_dictionary["ETL_REGISTER"][etl_name]
 
-    # start measuring time for the etl
-    start_time = time.time()
-
-    table_name, _, suffix = etl_name.rpartition('_')  # get table name using etl_name
+    # get table name using etl_name
+    table_name, _, suffix = etl_name.rpartition('_')
 
     # import the module dynamically
     module = importlib.import_module(f"{etl_src_module}.{etl_name}.{etl_name}")
@@ -26,12 +24,15 @@ def main(etl_name):
     etl_class = getattr(module, etl_class_name)
 
     threads = []
+
     # Now you can use the imported class
     etl_instance = etl_class(logger=logger)
     etl_instance.daemon = True
     threads.append(etl_instance)
-    etl_instance.start()
 
+    # start measuring time for the etl
+    start_time = time.time()
+    etl_instance.start()
     try:
         for thread in threads:
             thread.join()

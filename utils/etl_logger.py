@@ -5,6 +5,7 @@ import sys
 
 from logging.handlers import TimedRotatingFileHandler
 from pythonjsonlogger import jsonlogger
+from utils.load_config import get_etl_dictionary
 
 
 def get_logger(name):
@@ -13,8 +14,12 @@ def get_logger(name):
     :param name: etl name
     :return: logger object
     """
-    # .log file path for the application filename:ocde_<etl_name>.log
-    log_path = '/var/log/odi-cache-db-etl-logs/ocde_{}.log'.format(name)
+    etl_configurations = get_etl_dictionary()
+    log_base_path = etl_configurations["LOG_PATH"]
+    log_file_prefix = etl_configurations["LOG_PREFIX"]
+
+    # .log file path for the application filename:<etl_name>.log
+    log_path = f'{log_base_path}/{log_file_prefix}_{name}.log'
 
     # create the log directory if it does not exist
     os.makedirs(

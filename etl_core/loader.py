@@ -11,11 +11,11 @@ class Loader:
 
     def get_cdc_limits(self, schema, table_name, cdc_column):
         """
-        Get max cdc column value for each opco
-        :param schema:
-        :param table_name:
+        Get max cdc column values
+        :param schema: schema
+        :param table_name:table name
         :param cdc_column: date time column for track down changes
-        :return: list : [['001','DATE'],['002','DATE']]
+        :return: list : [[Date object]]
         """
 
         fetch_cursor = self.target_connection.cursor()
@@ -36,7 +36,7 @@ class Loader:
         :param add_column: added data tracking column (date time)
         :param upd_column: updated tracking column (date time)
         :param table_name: table name
-        :return: list : [['001','DATE'],['002','DATE']]
+        :return: list : [[Date object]]
         """
         fetch_cursor = self.target_connection.cursor()
         query = f"select max({add_column}) " \
@@ -52,11 +52,10 @@ class Loader:
     def get_last_updated_dates(self, schema, table_name, add_column, upd_column):
         """
         Get last upd_date in cache db (used in business column cdc methods)
+        :param schema:
         :param add_column: added data tracking column (date time)
         :param upd_column: updated tracking column (date time)
         :param table_name: table name
-        :param opco_id_column: column for identify opco id in a record
-        :param opco_id_csv: list of opco ids as a csv
         :return: list : [['001','DATE'],['002','DATE']]
         """
         fetch_cursor = self.target_connection.cursor()
@@ -89,11 +88,11 @@ class Loader:
 
         return tuples
 
-    def delete_all_records(self, table_name):
+    def delete_all_records(self, schema, table_name):
         """
         Delete all the records from the table
         """
-        delete_query = f"delete from {self.schema}.{table_name}"
+        delete_query = f"delete from {schema}.{table_name}"
         target_cursor = self.target_connection.cursor()
         target_cursor.execute(delete_query)
         self.target_connection.commit()
@@ -176,30 +175,6 @@ class Loader:
         target_cursor.execute(vacuum_query)
         self.target_connection.commit()
         target_cursor.close()
-
-    def delete_last_inserted_opco(self, table_name, opco_id_identifier):
-        """
-        Get delete records for last opco
-        :param table_name:
-        :param opco_id_identifier: column for identify opco id in a record
-        :return: list : [['001','DATE'],['002','DATE']]
-        """
-
-        fetch_cursor = self.target_connection.cursor()
-        query = f"select max({opco_id_identifier}) from {self.schema}.{table_name}"
-        fetch_cursor.execute(query)
-        tuples = fetch_cursor.fetchall()
-        max_opco = tuples[0][0]
-
-        print(max_opco, 'going to delete')
-
-        query = f"delete from {self.schema}.{table_name} where {opco_id_identifier}='{max_opco}'"
-        fetch_cursor.execute(query)
-        self.target_connection.commit()
-
-        fetch_cursor.close()
-
-        return max_opco
 
     def close_connection(self):
         self.target_connection.close()

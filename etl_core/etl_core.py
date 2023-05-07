@@ -13,34 +13,6 @@ class ETLCore(Thread):
         Thread.__init__(self)
         self.logger = logger
 
-    def full_load_by_schema(self, table_name, columns, condition=None, mat_view=None):
-        """
-        fetch and load data for each opco one at a time
-        :param mat_view: view for update
-        :param columns: columns of table
-        :param table_name: table name
-        :param condition: Where clause for sql string. Default is None
-        """
-        extractor = Extractor()
-        loader = Loader()
-
-        for opco in self.opco_list:
-            query = f"SELECT {columns} " \
-                    f"FROM swmspart_{opco}.{table_name}"
-            if condition is not None:
-                query += condition
-
-            for records in extractor.fetch_records_by_query(query):
-                if len(records) > 0:
-                    loader.insert_records(table_name=table_name, columns=columns, records=records)
-
-        # refresh materialize view if exists.
-        if mat_view is not None:
-            loader.refresh_view(mat_view)
-
-        extractor.close_connection()
-        loader.close_connection()
-
     def full_load_by_schema_union(self, schema, table_name, columns, condition=None, mat_view=None):
         """
         dynamically create a union query for given table name and condition
@@ -182,7 +154,7 @@ class ETLCore(Thread):
         loaded_hours, batch_count, record_count = 0, 1, 0
 
         while loaded_hours <= retain_duration:
-            print(f'--- loading data from ::: {lower_limit_ts} to ::: {upper_limit_ts} ---')
+            self.logger(f'--- loading data from ::: {lower_limit_ts} to ::: {upper_limit_ts} ---')
             for records in extractor.fetch_records_between(schema=schema,
                                                            table_name=table_name,
                                                            columns=columns,
