@@ -28,8 +28,8 @@ def get_config_dictionary():
     return config_data
 
 
-def get_etl_dictionary():
-    with open(f"config/etl_register.json") as json_data_file:
+def get_etl_configurations():
+    with open(f"config/main_config.json") as json_data_file:
         config_data = json.load(json_data_file)
     return config_data
 

@@ -4,13 +4,13 @@ import time
 
 from utils.custom_exceptions import CustomException
 from utils.etl_logger import get_logger
-from utils.load_config import get_etl_dictionary
+from utils.load_config import get_etl_configurations
 
 
 def main(etl_name):
 
     # load ETL configurations.
-    etl_dictionary = get_etl_dictionary()
+    etl_dictionary = get_etl_configurations()
     etl_src_module = etl_dictionary["ETL_SRC_MODULE"]
     etl_class_name = etl_dictionary["ETL_REGISTER"][etl_name]
 
@@ -54,7 +54,7 @@ if __name__ == '__main__':
     try:
         etl_name_to_verify = sys.argv[1]
         # validate the command line argument.
-        if etl_name_to_verify in get_etl_dictionary()["ETL_REGISTER"]:
+        if etl_name_to_verify in get_etl_configurations()["ETL_REGISTER"]:
             logger = get_logger(etl_name_to_verify)
             main(sys.argv[1])
         else:

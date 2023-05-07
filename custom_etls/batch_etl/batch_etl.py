@@ -23,11 +23,11 @@ class BatchETL(ETLCore):
     # @override
     def run(self):
         try:
-            self.cdc_using_business_columns(schema=self.table_definition["schema"],
-                                            table_name=self.TABLE_NAME,
-                                            columns=self.table_definition["columns"],
-                                            pk_columns=self.table_definition["pk"],
-                                            add_date_column=self.table_definition["inserted_ts_column"],
-                                            upd_date_column=self.table_definition["updated_ts_column"])
+            self.business_columns_based_cdc_etl(schema=self.table_definition["schema"],
+                                                table_name=self.TABLE_NAME,
+                                                columns=self.table_definition["columns"],
+                                                pk_columns=self.table_definition["pk"],
+                                                add_date_column=self.table_definition["inserted_ts_column"],
+                                                upd_date_column=self.table_definition["updated_ts_column"])
         except BaseException as e:
             self.exc = e

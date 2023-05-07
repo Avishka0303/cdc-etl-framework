@@ -22,10 +22,10 @@ class UserETL(ETLCore):
 
     def run(self):
         try:
-            self.full_load_by_schema_union(schema=self.table_definition["schema"],
-                                           table_name=self.TABLE_NAME,
-                                           columns=self.table_definition["columns"],
-                                           condition=self.table_definition["condition"],
-                                           mat_view=self.table_definition["mat_view"])
+            self.full_load_table(schema=self.table_definition["schema"],
+                                 table_name=self.TABLE_NAME,
+                                 columns=self.table_definition["columns"],
+                                 condition=self.table_definition["condition"],
+                                 mat_view=self.table_definition["mat_view"])
         except BaseException as e:
             self.exc = e

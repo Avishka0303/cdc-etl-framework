@@ -3,7 +3,7 @@
         "user": {
             "schema": "test",
             "columns": "usr_id,usr_name,contact",
-            "pk": "user_id",
+            "pk": "usr_id",
             "condition": null,
             "retain_days": null,
             "mat_view": "mt_user",
@@ -31,6 +31,12 @@
             "retain_days": 5,
             "thread_count": 1,
             "etl_type": "cdc"
+        },
+        "user_transaction_aggr": {
+            "schema": "test",
+            "columns": "usr_id,usr_name,contact,trans_id,trans_date",
+            "pk": "usr_id,trans_id",
+            "mat_view": "mv_user_transaction_aggr"
         }
     }
 }

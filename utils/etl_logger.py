@@ -5,7 +5,7 @@ import sys
 
 from logging.handlers import TimedRotatingFileHandler
 from pythonjsonlogger import jsonlogger
-from utils.load_config import get_etl_dictionary
+from utils.load_config import get_etl_configurations
 
 
 def get_logger(name):
@@ -14,7 +14,7 @@ def get_logger(name):
     :param name: etl name
     :return: logger object
     """
-    etl_configurations = get_etl_dictionary()
+    etl_configurations = get_etl_configurations()
     log_base_path = etl_configurations["LOG_PATH"]
     log_file_prefix = etl_configurations["LOG_PREFIX"]
 

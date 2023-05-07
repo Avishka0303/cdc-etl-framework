@@ -13,9 +13,9 @@ class ETLCore(Thread):
         Thread.__init__(self)
         self.logger = logger
 
-    def full_load_by_schema_union(self, schema, table_name, columns, condition=None, mat_view=None):
+    def full_load_table(self, schema, table_name, columns, condition=None, mat_view=None):
         """
-        dynamically create a union query for given table name and condition
+        copy and load a table from one source to another.
         :param schema:
         :param mat_view: view for update
         :param table_name: table name
@@ -50,85 +50,6 @@ class ETLCore(Thread):
                     'materialized view': f'{mat_view}',
                     'elapsed_time': f'{time.time() - mat_st_time}'
                 })
-
-    def cdc_load_by_schema(self, schema, table_name, columns, pk_columns, cdc_column, cdc_has_time=True):
-        """
-        insert data from source to target using change data capturing schema by schema(OPCO wise)
-        :param schema:
-        :param cdc_has_time:
-        :param pk_columns: primary key columns
-        :param table_name: source and target table name
-        :param columns: columns of interest
-        :param cdc_column: auditing column for change capturing by time
-        """
-
-        loader = Loader()
-        extractor = Extractor()
-
-        search_time = time.time()
-        # get limits records [[001,max_date],[002,max_date],...]
-        limit_records = loader.get_cdc_limits(schema=schema,
-                                              table_name=table_name,
-                                              cdc_column=cdc_column)
-
-        search_time_elapsed = time.time() - search_time
-
-        self.logger.info(f'--- Elapsed time for get last updated times: {search_time_elapsed}s ---',
-                         extra={
-                             'etl_event': 'CDC-Limit-Fetcher',
-                             'elapsed_time': f'{search_time_elapsed}'
-                         })
-
-        batch_count, record_count = 0, 0
-
-        last_recorded_timestamp, st_time = limit_records[0][0].strftime('%Y-%m-%d %H:%M:%S.%f'), time.time()
-
-        self.logger.info(f"--- start record fetching for table ::: {table_name} "
-                         f"--- last updated timestamp ::: {last_recorded_timestamp} --- ")
-
-        primary_key_indexes = get_column_index_from_csv(column_csv=columns,
-                                                        idx_columns=pk_columns)
-
-        # iterating over batches
-        for batch in extractor.fetch_records_by_cdc(schema=schema,
-                                                    table_name=table_name,
-                                                    columns=columns,
-                                                    pk_columns=pk_columns,
-                                                    cdc_column=cdc_column,
-                                                    cdc_limit="'" + last_recorded_timestamp + "'",
-                                                    cdc_key_with_time=cdc_has_time):
-            batch_size = len(batch)
-
-            if batch_size > 0:
-                # delete existing columns.
-                pk_values_sliced = [[row[i] for i in primary_key_indexes] for row in batch]
-
-                deleted_row_count = loader.delete_existing_records(schema=schema,
-                                                                   table_name=table_name,
-                                                                   pk_column_csv=pk_columns,
-                                                                   composite_key_list=pk_values_sliced)
-
-                print(f'--- batch: {batch_count} insert started. deleted existing row count: {deleted_row_count} -')
-
-                # insert batch of records
-                loader.insert_records(schema=schema,
-                                      table_name=table_name,
-                                      columns=columns,
-                                      records=batch)
-
-                print(f'batch: {batch_count} successfully. total inserted records : {record_count + batch_size}')
-
-                record_count, batch_count = record_count + batch_size, batch_count + 1
-
-        self.logger.info(f" --- Insertion completed for table: {table_name} => record count: {record_count} "
-                         f"elapsed time: {time.time() - st_time} s ---\n",
-                         extra={
-                             'table_name': f'{table_name}',
-                             'elapsed_time': f'{time.time() - st_time}'
-                         })
-
-        extractor.close_connection()
-        loader.close_connection()
 
     def full_load_by_time_window(self, schema, table_name, columns, cdc_column, retain_duration_days):
         """
@@ -176,10 +97,89 @@ class ETLCore(Thread):
         extractor.close_connection()
         loader.close_connection()
 
-    def cdc_using_business_columns(self, schema, table_name, columns, pk_columns, add_date_column, upd_date_column):
+    def single_ts_column_based_cdc_etl(self, schema, table_name, columns, pk_columns, cdc_column, cdc_column_has_milliseconds=True):
         """
-        insert data from source to target using change data capturing schema by schema(OPCO wise)
+        insert data from source to target using single column based change data capturing
         :param schema:
+        :param cdc_column_has_milliseconds:
+        :param pk_columns: primary key columns
+        :param table_name: source and target table name
+        :param columns: columns of interest
+        :param cdc_column: auditing column for change capturing by time
+        """
+
+        loader = Loader()
+        extractor = Extractor()
+
+        search_time = time.time()
+        # get limits records [[001,max_date],[002,max_date],...]
+        limit_records = loader.get_cdc_limits(schema=schema,
+                                              table_name=table_name,
+                                              cdc_column=cdc_column)
+
+        search_time_elapsed = time.time() - search_time
+
+        self.logger.info(f'--- Elapsed time for get last updated times: {search_time_elapsed}s ---',
+                         extra={
+                             'etl_event': 'CDC-Limit-Fetcher',
+                             'elapsed_time': f'{search_time_elapsed}'
+                         })
+
+        batch_count, record_count = 0, 0
+
+        last_recorded_timestamp, st_time = limit_records[0][0].strftime('%Y-%m-%d %H:%M:%S.%f'), time.time()
+
+        self.logger.info(f"--- start record fetching for table ::: {table_name} "
+                         f"--- last updated timestamp ::: {last_recorded_timestamp} --- ")
+
+        primary_key_indexes = get_column_index_from_csv(column_csv=columns,
+                                                        idx_columns=pk_columns)
+
+        # iterating over batches
+        for batch in extractor.fetch_records_by_cdc(schema=schema,
+                                                    table_name=table_name,
+                                                    columns=columns,
+                                                    pk_columns=pk_columns,
+                                                    cdc_column=cdc_column,
+                                                    cdc_limit="'" + last_recorded_timestamp + "'",
+                                                    cdc_key_with_time=cdc_column_has_milliseconds):
+            batch_size = len(batch)
+
+            if batch_size > 0:
+                # delete existing columns.
+                pk_values_sliced = [[row[i] for i in primary_key_indexes] for row in batch]
+
+                deleted_row_count = loader.delete_existing_records(schema=schema,
+                                                                   table_name=table_name,
+                                                                   pk_column_csv=pk_columns,
+                                                                   composite_key_list=pk_values_sliced)
+
+                print(f'--- batch: {batch_count} insert started. deleted existing row count: {deleted_row_count} -')
+
+                # insert batch of records
+                loader.insert_records(schema=schema,
+                                      table_name=table_name,
+                                      columns=columns,
+                                      records=batch)
+
+                print(f'batch: {batch_count} successfully. total inserted records : {record_count + batch_size}')
+
+                record_count, batch_count = record_count + batch_size, batch_count + 1
+
+        self.logger.info(f" --- Insertion completed for table: {table_name} => record count: {record_count} "
+                         f"elapsed time: {time.time() - st_time} s ---\n",
+                         extra={
+                             'table_name': f'{table_name}',
+                             'elapsed_time': f'{time.time() - st_time}'
+                         })
+
+        extractor.close_connection()
+        loader.close_connection()
+
+    def business_columns_based_cdc_etl(self, schema, table_name, columns, pk_columns, add_date_column, upd_date_column):
+        """
+        insert data from source to target using business columns based change data capturing
+        :param schema: source and target schema.
         :param upd_date_column: update tracking column
         :param add_date_column: insertion tracking column
         :param pk_columns: primary key columns
@@ -306,3 +306,35 @@ class ETLCore(Thread):
 
         extractor.close_connection()
         loader.close_connection()
+
+    def run_query_customized_etl(self, query, target_schema, target_table, target_columns, mat_view):
+        """
+        dynamically create a union query for given table name and condition
+        :param mat_view:
+        :param target_columns:
+        :param query:
+        :param target_table:
+        :param target_schema:
+        """
+
+        extractor = Extractor()
+        loader = Loader()
+
+        # fetch records from tables and insert into cache db
+        for records in extractor.fetch_records_by_query(query=query):
+            if len(records) > 0:
+                loader.insert_records(schema=target_schema,
+                                      table_name=target_table,
+                                      columns=target_columns,
+                                      records=records)
+
+        # refresh materialize view if exists.
+        if mat_view is not None:
+            loader.refresh_view(schema=target_schema, view_name=mat_view)
+            mat_st_time = time.time()
+            self.logger.info(
+                f"--- Materialized view updated {mat_view} elapsed time: {time.time() - mat_st_time}s ---\n",
+                extra={
+                    'materialized view': f'{mat_view}',
+                    'elapsed_time': f'{time.time() - mat_st_time}'
+                })

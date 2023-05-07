@@ -23,10 +23,10 @@ class TransactionETL(ETLCore):
     # @override
     def run(self):
         try:
-            self.cdc_load_by_schema(schema=self.table_definition["schema"],
-                                    table_name=self.TABLE_NAME,
-                                    columns=self.table_definition["columns"],
-                                    pk_columns=self.table_definition["pk"],
-                                    cdc_column=self.table_definition["cdc_key"])
+            self.single_ts_column_based_cdc_etl(schema=self.table_definition["schema"],
+                                                table_name=self.TABLE_NAME,
+                                                columns=self.table_definition["columns"],
+                                                pk_columns=self.table_definition["pk"],
+                                                cdc_column=self.table_definition["cdc_key"])
         except BaseException as e:
             self.exc = e
