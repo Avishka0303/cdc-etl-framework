@@ -27,6 +27,6 @@ class TransactionETL(ETLCore):
                                                 table_name=self.TABLE_NAME,
                                                 columns=self.table_definition["columns"],
                                                 pk_columns=self.table_definition["pk"],
-                                                cdc_column=self.table_definition["cdc_key"])
+                                                cdc_column=self.table_definition["cdc_ts_column"])
         except BaseException as e:
             self.exc = e

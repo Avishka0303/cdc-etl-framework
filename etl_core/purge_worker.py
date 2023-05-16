@@ -17,7 +17,7 @@ def time_based_purge(table_name):
     tbl_def = get_table_definition(table_name)
     batch_loader = Loader()
     batch_loader.delete_records_by_time(table_name=table_name,
-                                        time_column=tbl_def["cdc_key"],
+                                        time_column=tbl_def["cdc_ts_column"],
                                         time_in_days=tbl_def["retain_days"])
     batch_loader.close_connection()
 

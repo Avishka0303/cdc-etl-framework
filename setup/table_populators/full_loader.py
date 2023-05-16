@@ -22,7 +22,7 @@ class FullLoader(ETLCore):
             self.full_load_by_time_window(schema=self.table_definition["schema"],
                                           table_name=self.table_name,
                                           columns=self.table_definition['columns'],
-                                          cdc_column=self.table_definition['cdc_key'],
+                                          cdc_column=self.table_definition['cdc_ts_column'],
                                           retain_duration_days=self.table_definition['retain_days'])
         except BaseException as be:
             self.exc = be

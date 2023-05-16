@@ -16,27 +16,28 @@
             "pk": "batch_id",
             "inserted_ts_column": "batch_inserted_ts",
             "updated_ts_column": "batch_updated_ts",
-            "cdc_key":null,
-            "condition": " WHERE report_date > now()  - interval '14 Day' ",
+            "cdc_ts_column":null,
+            "condition": null,
             "retain_days": 14,
             "thread_count": 1,
-            "etl_type": "business-cdc"
+            "etl_type": "business-ts-based-cdc"
         },
         "transaction": {
             "schema": "test",
             "columns":"trans_id,usr_id,trans_date",
             "pk": "trans_id",
-            "cdc_key": "trans_date",
+            "cdc_ts_column": "trans_date",
             "condition": null,
             "retain_days": 5,
             "thread_count": 1,
-            "etl_type": "cdc"
+            "etl_type": "single-ts-based-cdc"
         },
         "user_transaction_aggr": {
             "schema": "test",
             "columns": "usr_id,usr_name,contact,trans_id,trans_date",
             "pk": "usr_id,trans_id",
-            "mat_view": "mv_user_transaction_aggr"
+            "mat_view": "mv_user_transaction_aggr",
+            "etl_type": "query-load"
         }
     }
 }
