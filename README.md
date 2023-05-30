@@ -134,5 +134,3 @@ Make sure to replace `<etl_name>` with the name of the ETL you want to execute.
 For more information and examples, you can visit [my GitHub repository](https://github.com/example-user/etl-framework).
 
 ---
-
-This is the readme file for the ETL framework. It provides an overview of the folder structure, steps to configure data sources, and instructions for table definitions and executing ETLs.
