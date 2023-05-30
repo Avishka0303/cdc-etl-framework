@@ -2,19 +2,19 @@ import argparse
 import time
 
 from etl_core.loader import Loader
-from utils.load_config import get_table_definition
+from utils.load_config import get_table_configurations
 from utils.etl_logger import get_logger
 
 
 def full_purge(table_name):
-    tbl_def = get_table_definition(table_name)
+    tbl_def = get_table_configurations(table_name)
     batch_loader = Loader()
     batch_loader.delete_all_records(schema=tbl_def["schema"], table_name=table_name)
     batch_loader.close_connection()
 
 
 def time_based_purge(table_name):
-    tbl_def = get_table_definition(table_name)
+    tbl_def = get_table_configurations(table_name)
     batch_loader = Loader()
     batch_loader.delete_records_by_time(table_name=table_name,
                                         time_column=tbl_def["cdc_ts_column"],
@@ -23,7 +23,7 @@ def time_based_purge(table_name):
 
 
 def main(table_name, purge_option):
-    tbl_def = get_table_definition(table_name)
+    tbl_def = get_table_configurations(table_name)
     logger.info(f'--- purge_{table_name}_etl started. ---')
     if tbl_def is not None:
         if purge_option == 'F':

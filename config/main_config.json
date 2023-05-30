@@ -8,6 +8,6 @@
     "ETL_SRC_MODULE": "custom_etls",
     "LOG_PATH": "logs",
     "LOG_PREFIX": "sample",
-    "TABLE_JSON_PATH": "",
+    "TABLE_CONFIG_JSON": "sample_tables",
     "EXTRACTOR_BATCH_SIZE": 15000
 }

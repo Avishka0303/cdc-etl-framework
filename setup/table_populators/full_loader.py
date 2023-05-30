@@ -3,7 +3,7 @@ import argparse
 from etl_core.etl_core import ETLCore
 from etl_core.loader import Loader
 from utils.etl_logger import get_logger
-from utils.load_config import get_table_definition
+from utils.load_config import get_table_configurations
 
 
 class FullLoader(ETLCore):
@@ -14,7 +14,7 @@ class FullLoader(ETLCore):
     def __init__(self, table_name, log):
         super().__init__(log)
         self.table_name = table_name
-        self.table_definition = get_table_definition(table_name)
+        self.table_definition = get_table_configurations(table_name)
         self.exc = None
 
     def full_load_table(self):
@@ -31,7 +31,7 @@ class FullLoader(ETLCore):
 def main(table_name, truncate_option):
     try:
         loader = Loader()
-        table_definition = get_table_definition(table_name)
+        table_definition = get_table_configurations(table_name)
 
         if truncate_option == 'Y':
             # secondary acceptance:

@@ -1,7 +1,7 @@
 import threading
 
 from etl_core.etl_core import ETLCore
-from utils.load_config import get_table_definition
+from utils.load_config import get_table_configurations
 
 
 class UserETL(ETLCore):
@@ -9,16 +9,11 @@ class UserETL(ETLCore):
 
     def __init__(self, logger):
         super().__init__(logger)
-        self.table_definition = get_table_definition(self.TABLE_NAME)
+        self.table_definition = get_table_configurations(self.TABLE_NAME)
         self.exc = None
 
     def __str__(self):
         return "user etl"
-
-    def join(self, **kwargs):
-        threading.Thread.join(self)
-        if self.exc:
-            raise self.exc
 
     def run(self):
         try:

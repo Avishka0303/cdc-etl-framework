@@ -1,7 +1,7 @@
 import psycopg2
 import mysql
 
-from utils.load_config import get_config_dictionary
+from utils.load_config import get_db_credentials
 
 
 def get_connection(db_name):
@@ -10,7 +10,7 @@ def get_connection(db_name):
     :param db_name: database name as indicated in config files
     :return: connection object
     """
-    db_credentials = get_config_dictionary()['db_credentials'][db_name]
+    db_credentials = get_db_credentials()['db_credentials'][db_name]
 
     db_type = db_credentials["db_type"]
 

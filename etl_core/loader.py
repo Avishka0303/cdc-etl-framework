@@ -101,6 +101,7 @@ class Loader:
     def delete_existing_records(self, schema, table_name, pk_column_csv, composite_key_list):
         """
         Delete the updated rows that already exist in the target database using primary key
+        :param schema:
         :param composite_key_list: list of tuples of primary key value.
         :param pk_column_csv: composite keys
                             composite_key_lists = [

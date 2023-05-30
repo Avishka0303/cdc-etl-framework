@@ -16,7 +16,7 @@ def get_environment():
     return etl_environment
 
 
-def get_config_dictionary():
+def get_db_credentials():
     """
     read .json configuration file related to environment
     :return: configuration dictionary
@@ -28,13 +28,13 @@ def get_config_dictionary():
     return config_data
 
 
-def get_etl_configurations():
+def get_main_configurations():
     with open(f"config/main_config.json") as json_data_file:
         config_data = json.load(json_data_file)
     return config_data
 
 
-def get_table_definition(table_name):
+def get_table_configurations(table_name):
     """
     retrieve table definitions
     :param table_name: table name

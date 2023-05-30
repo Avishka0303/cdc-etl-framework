@@ -1,7 +1,7 @@
 import threading
 
 from etl_core.etl_core import ETLCore
-from utils.load_config import get_table_definition
+from utils.load_config import get_table_configurations
 
 
 class TransactionETL(ETLCore):
@@ -9,21 +9,16 @@ class TransactionETL(ETLCore):
 
     def __init__(self, logger):
         super().__init__(logger)
-        self.table_definition = get_table_definition(self.TABLE_NAME)
+        self.table_definition = get_table_configurations(self.TABLE_NAME)
         self.exc = None
 
     def __str__(self):
         return "transaction etl"
 
-    def join(self, **kwargs):
-        threading.Thread.join(self)
-        if self.exc:
-            raise self.exc
-
     # @override
     def run(self):
         try:
-            self.single_ts_column_based_cdc_etl(schema=self.table_definition["schema"],
+            self.single_timestamp_based_cdc_etl(schema=self.table_definition["schema"],
                                                 table_name=self.TABLE_NAME,
                                                 columns=self.table_definition["columns"],
                                                 pk_columns=self.table_definition["pk"],

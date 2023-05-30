@@ -4,6 +4,7 @@ from threading import Thread
 
 from etl_core.extractor import Extractor
 from etl_core.loader import Loader
+from etl_core.purger import full_purge
 from utils.list_manipulator import get_column_index_from_csv
 
 
@@ -12,6 +13,12 @@ class ETLCore(Thread):
     def __init__(self, logger):
         Thread.__init__(self)
         self.logger = logger
+        self.exc = None
+
+    def join(self, **kwargs):
+        Thread.join(self)
+        if self.exc:
+            raise self.exc
 
     def full_load_table(self, schema, table_name, columns, condition=None, mat_view=None):
         """
@@ -22,11 +29,15 @@ class ETLCore(Thread):
         :param columns: for get all the columns pass '*' , otherwise pass comma seperated column list
         :param condition: condition for table , Default is None.
         """
+
+        # full purge the table
+        full_purge(table_name=table_name)
+
         # dynamically generate union query
         query_string = f"SELECT {columns} " \
                        f"FROM {schema}.{table_name} "
         if condition is not None:
-            query_string += condition
+            query_string += f'where {condition}'
 
         extractor = Extractor()
         loader = Loader()
@@ -97,7 +108,7 @@ class ETLCore(Thread):
         extractor.close_connection()
         loader.close_connection()
 
-    def single_ts_column_based_cdc_etl(self, schema, table_name, columns, pk_columns, cdc_column, cdc_column_has_milliseconds=True):
+    def single_timestamp_based_cdc_etl(self, schema, table_name, columns, pk_columns, cdc_column, cdc_column_has_milliseconds=True):
         """
         insert data from source to target using single column based change data capturing
         :param schema:
@@ -338,3 +349,5 @@ class ETLCore(Thread):
                     'materialized view': f'{mat_view}',
                     'elapsed_time': f'{time.time() - mat_st_time}'
                 })
+
+
