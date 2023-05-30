@@ -105,9 +105,8 @@ Here is an example of a table definition JSON:
             "mat_view": "mt_user",
             "thread_count": 1,
             "etl_type": "full-load"
-        },
-        ...
-    },
+        }
+    }
 }
 ```
 
